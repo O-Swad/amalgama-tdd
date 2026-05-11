@@ -84,7 +84,10 @@ def test_sensor_and_truth_timestamps_are_correlatable():
 
     for rows in (truth, ais, radar):
         assert_strictly_increasing_timestamps(rows)
-        assert {row["vessel_id"] for row in rows} == {"VESSEL-001"}
+
+    assert {row["vessel_id"] for row in truth} == {"VESSEL-001"}
+    assert len({row["vessel_id"] for row in ais}) == 1
+    assert len({row["vessel_id"] for row in radar}) == 1
 
     truth_times = [parse_timestamp(row["timestamp_utc"]) for row in truth]
     ais_times = [parse_timestamp(row["timestamp_utc"]) for row in ais]

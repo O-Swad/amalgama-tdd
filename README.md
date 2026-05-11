@@ -16,7 +16,9 @@ The tests encode these requirements:
 
 - Radar has priority over AIS for estimated position.
 - The estimated `latitude_deg` and `longitude_deg` must be copied from the correlated Radar measurement.
-- Radar and AIS measurements must be correlated to identify readings that belong to the same vessel.
+- Radar and AIS measurements must be correlated to identify readings that belong to the same physical vessel.
+- Correlation must not rely solely on sensor identifiers such as `vessel_id`, because AIS and Radar may use different ids for the same vessel and matching ids may still describe different objects.
+- Correlation must use temporal and geometric consistency, or an equivalent non-id-only association strategy.
 - AIS data enriches the Radar-based estimate with vessel attributes such as `mmsi`, `sog_mps`, `cog_deg`, `heading_deg`, `navigation_status`, and `position_accuracy`.
 - AIS readings from other vessels must not enrich the selected Radar track.
 

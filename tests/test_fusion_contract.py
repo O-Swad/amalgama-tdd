@@ -1,4 +1,5 @@
 import csv
+import math
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -44,12 +45,28 @@ def parse_timestamp(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
 
 
-def nearest_ais_row(ais_rows: list[dict[str, str]], radar_row: dict[str, str]) -> dict[str, str]:
+def distance_m(a: dict[str, str], b: dict[str, str]) -> float:
+    lat1 = math.radians(float(a["latitude_deg"]))
+    lat2 = math.radians(float(b["latitude_deg"]))
+    dlat = lat2 - lat1
+    dlon = math.radians(float(b["longitude_deg"]) - float(a["longitude_deg"]))
+    hav = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    return 6371000 * 2 * math.atan2(math.sqrt(hav), math.sqrt(1 - hav))
+
+
+def correlated_ais_row(ais_rows: list[dict[str, str]], radar_row: dict[str, str]) -> dict[str, str]:
     radar_time = parse_timestamp(radar_row["timestamp_utc"])
-    same_vessel_rows = [row for row in ais_rows if row["vessel_id"] == radar_row["vessel_id"]]
+    candidates = [
+        row
+        for row in ais_rows
+        if abs((parse_timestamp(row["timestamp_utc"]) - radar_time).total_seconds()) <= 20
+    ]
     return min(
-        same_vessel_rows,
-        key=lambda row: abs((parse_timestamp(row["timestamp_utc"]) - radar_time).total_seconds()),
+        candidates,
+        key=lambda row: (
+            distance_m(row, radar_row),
+            abs((parse_timestamp(row["timestamp_utc"]) - radar_time).total_seconds()),
+        ),
     )
 
 
@@ -82,7 +99,7 @@ def test_radar_position_has_priority_over_ais_position():
 
     fused_row = rows[0]
     radar_row = radar_rows[0]
-    ais_row = nearest_ais_row(ais_rows, radar_row)
+    ais_row = correlated_ais_row(ais_rows, radar_row)
 
     assert fused_row["timestamp_utc"] == radar_row["timestamp_utc"]
     assert float(fused_row["latitude_deg"]) == pytest.approx(float(radar_row["latitude_deg"]), abs=0.000001)
@@ -91,13 +108,13 @@ def test_radar_position_has_priority_over_ais_position():
     assert float(fused_row["longitude_deg"]) != pytest.approx(float(ais_row["longitude_deg"]), abs=0.000001)
 
 
-def test_radar_measurements_are_enriched_with_correlated_ais_attributes():
+def test_radar_measurements_are_enriched_with_geometrically_correlated_ais_attributes():
     rows = fused_rows()
     radar_rows = read_csv(RADAR_CSV)
     ais_rows = read_csv(AIS_CSV)
 
     for fused_row, radar_row in zip(rows, radar_rows):
-        ais_row = nearest_ais_row(ais_rows, radar_row)
+        ais_row = correlated_ais_row(ais_rows, radar_row)
 
         assert fused_row["mmsi"] == ais_row["mmsi"]
         assert fused_row["sog_mps"] == ais_row["sog_mps"]
@@ -112,7 +129,7 @@ def test_radar_measurements_are_enriched_with_correlated_ais_attributes():
         assert fused_row["range_rate_mps"] == radar_row["range_rate_mps"]
 
 
-def test_correlation_uses_nearest_ais_reading_for_the_same_vessel():
+def test_correlation_uses_temporal_and_geometric_proximity_not_sensor_ids():
     rows = fused_rows()
 
     row_at_100025 = next(row for row in rows if row["timestamp_utc"] == "2026-05-07T10:00:25Z")
@@ -123,17 +140,40 @@ def test_correlation_uses_nearest_ais_reading_for_the_same_vessel():
     assert row_at_100025["heading_deg"] == "62.7"
 
 
-def test_correlation_ignores_ais_measurements_from_other_vessels(tmp_path):
+def test_correlation_accepts_ais_and_radar_tracks_with_different_ids(tmp_path):
+    ais_rows = read_csv(AIS_CSV)
+    for row in ais_rows:
+        row["vessel_id"] = "AIS-TRACK-ALPHA"
+
+    ais_with_different_ids = tmp_path / "ais_with_different_ids.csv"
+    with ais_with_different_ids.open("w", newline="") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=list(ais_rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(ais_rows)
+
+    rows = fuse_tracks(
+        ais_with_different_ids,
+        RADAR_CSV,
+        vessel_id="VESSEL-001",
+        output_interval_seconds=10,
+    )
+
+    assert rows[0]["mmsi"] == "224123456"
+    assert rows[0]["navigation_status"] == "under_way_using_engine"
+    assert rows[0]["position_accuracy"] == "high"
+
+
+def test_correlation_rejects_id_match_when_geometry_is_implausible(tmp_path):
     ais_rows = read_csv(AIS_CSV)
     radar_rows = read_csv(RADAR_CSV)
-    rogue_ais_row = dict(ais_rows[0])
-    rogue_ais_row.update(
+    misleading_ais_row = dict(ais_rows[0])
+    misleading_ais_row.update(
         {
             "timestamp_utc": radar_rows[0]["timestamp_utc"],
-            "vessel_id": "VESSEL-999",
+            "vessel_id": radar_rows[0]["vessel_id"],
             "mmsi": "999999999",
-            "latitude_deg": radar_rows[0]["latitude_deg"],
-            "longitude_deg": radar_rows[0]["longitude_deg"],
+            "latitude_deg": "36.900000",
+            "longitude_deg": "-6.900000",
             "sog_mps": "0.00",
             "cog_deg": "0.0",
             "heading_deg": "0.0",
@@ -141,14 +181,14 @@ def test_correlation_ignores_ais_measurements_from_other_vessels(tmp_path):
             "position_accuracy": "low",
         }
     )
-    ais_with_rogue = tmp_path / "ais_with_rogue.csv"
-    with ais_with_rogue.open("w", newline="") as csv_file:
+    ais_with_misleading_id = tmp_path / "ais_with_misleading_id.csv"
+    with ais_with_misleading_id.open("w", newline="") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=list(ais_rows[0].keys()))
         writer.writeheader()
-        writer.writerows([rogue_ais_row, *ais_rows])
+        writer.writerows([misleading_ais_row, *ais_rows])
 
     rows = fuse_tracks(
-        ais_with_rogue,
+        ais_with_misleading_id,
         RADAR_CSV,
         vessel_id="VESSEL-001",
         output_interval_seconds=10,
