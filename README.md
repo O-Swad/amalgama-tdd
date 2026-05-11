@@ -1,26 +1,26 @@
 # Ship Fusion Simulator
 
-Proyecto base para evaluar un modulo de fusion de datos de posicionamiento maritimo.
+Starter project for evaluating a maritime positioning data-fusion module.
 
-## Datos de ejemplo
+## Sample Data
 
-Los CSV de `data/` describen un unico barco correlacionable con `vessel_id=VESSEL-001`:
+The CSV files in `data/` describe a single correlatable vessel with `vessel_id=VESSEL-001`:
 
-- `ground_truth.csv`: verdad terreno cada 10 segundos entre `2026-05-07T10:00:00Z` y `2026-05-07T10:05:00Z`.
-- `ais_readings.csv`: lecturas AIS cada 30 segundos con error pequeno de posicion.
-- `radar_readings.csv`: lecturas Radar cada 10 segundos, desplazadas 5 segundos respecto a verdad terreno, con error mayor.
+- `ground_truth.csv`: ground-truth positions every 10 seconds between `2026-05-07T10:00:00Z` and `2026-05-07T10:05:00Z`.
+- `ais_readings.csv`: AIS readings every 30 seconds with small position error.
+- `radar_readings.csv`: Radar readings every 10 seconds, offset by 5 seconds from ground truth, with larger position error.
 
-## Contrato del resultado de fusion
+## Fusion Result Contract
 
-El simulador espera un CSV con esta cabecera:
+The simulator expects a CSV file with this header:
 
 ```csv
 timestamp_utc,vessel_id,latitude_deg,longitude_deg,sog_mps,cog_deg,source_count,covariance_x_m2,covariance_y_m2
 ```
 
-## Pruebas TDD
+## TDD Tests
 
-Instala las dependencias de desarrollo en un entorno virtual local y ejecuta las pruebas:
+Install the development dependencies in a local virtual environment and run the tests:
 
 ```bash
 python3 -m venv .venv
@@ -28,6 +28,6 @@ python3 -m venv .venv
 .venv/bin/python -m pytest
 ```
 
-Las pruebas de `tests/test_dataset_quality.py` validan que los datasets son coherentes. Las pruebas de
-`tests/test_fusion_contract.py` fijan el comportamiento que debe implementar el modulo de fusion en
+The tests in `tests/test_dataset_quality.py` validate that the datasets are coherent. The tests in
+`tests/test_fusion_contract.py` define the behavior that the fusion module must implement in
 `src/ship_fusion/fusion.py`.
