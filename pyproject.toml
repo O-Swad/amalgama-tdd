@@ -1,0 +1,9 @@
+[project]
+name = "ship-fusion-simulator"
+version = "0.1.0"
+description = "Datasets and TDD contract for evaluating ship data-fusion modules."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

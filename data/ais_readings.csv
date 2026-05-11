@@ -1,0 +1,12 @@
+timestamp_utc,mmsi,vessel_id,latitude_deg,longitude_deg,sog_mps,cog_deg,heading_deg,navigation_status,position_accuracy
+2026-05-07T10:00:00Z,224123456,VESSEL-001,36.700011,-6.250027,6.23,62.2,63.2,under_way_using_engine,high
+2026-05-07T10:00:30Z,224123456,VESSEL-001,36.700757,-6.248138,6.16,61.7,62.7,under_way_using_engine,high
+2026-05-07T10:01:00Z,224123456,VESSEL-001,36.701591,-6.246277,6.22,62.1,63.1,under_way_using_engine,high
+2026-05-07T10:01:30Z,224123456,VESSEL-001,36.702338,-6.244515,6.21,62.0,63.0,under_way_using_engine,high
+2026-05-07T10:02:00Z,224123456,VESSEL-001,36.703166,-6.242657,6.17,62.4,63.4,under_way_using_engine,high
+2026-05-07T10:02:30Z,224123456,VESSEL-001,36.703902,-6.240788,6.20,61.8,62.8,under_way_using_engine,high
+2026-05-07T10:03:00Z,224123456,VESSEL-001,36.704721,-6.238930,6.24,62.3,63.3,under_way_using_engine,high
+2026-05-07T10:03:30Z,224123456,VESSEL-001,36.705466,-6.237142,6.18,61.9,62.9,under_way_using_engine,high
+2026-05-07T10:04:00Z,224123456,VESSEL-001,36.706294,-6.235317,6.21,62.2,63.2,under_way_using_engine,high
+2026-05-07T10:04:30Z,224123456,VESSEL-001,36.707047,-6.233407,6.19,61.6,62.6,under_way_using_engine,high
+2026-05-07T10:05:00Z,224123456,VESSEL-001,36.707853,-6.231620,6.22,62.1,63.1,under_way_using_engine,high
