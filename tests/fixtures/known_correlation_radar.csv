@@ -1,0 +1,3 @@
+timestamp_utc,radar_id,track_id,vessel_id,range_m,bearing_deg,range_rate_mps,latitude_deg,longitude_deg,measurement_std_m
+2026-05-07T10:00:00Z,RADAR-TEST-01,RDR-T001,RADAR-ALPHA,1000.0,60.00,-3.20,36.700000,-6.250000,15.0
+2026-05-07T10:00:10Z,RADAR-TEST-01,RDR-T001,RADAR-ALPHA,1062.0,60.50,-3.10,36.700784,-6.248160,15.0

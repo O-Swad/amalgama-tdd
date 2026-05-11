@@ -1,0 +1,5 @@
+timestamp_utc,mmsi,vessel_id,latitude_deg,longitude_deg,sog_mps,cog_deg,heading_deg,navigation_status,position_accuracy
+2026-05-07T10:00:00Z,111111111,AIS-ALPHA,36.700050,-6.249950,6.20,62.0,63.0,under_way_using_engine,high
+2026-05-07T10:00:00Z,999999999,RADAR-ALPHA,36.900000,-6.900000,0.00,0.0,0.0,moored,low
+2026-05-07T10:00:12Z,222222222,AIS-BETA,36.700760,-6.248180,6.16,61.7,62.7,under_way_using_engine,high
+2026-05-07T10:00:12Z,333333333,AIS-DECOY,36.701600,-6.247000,2.00,90.0,91.0,under_way_using_engine,low

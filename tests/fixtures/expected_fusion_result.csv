@@ -1,0 +1,3 @@
+timestamp_utc,vessel_id,latitude_deg,longitude_deg,sog_mps,cog_deg,heading_deg,mmsi,navigation_status,position_accuracy,radar_id,track_id,range_m,bearing_deg,range_rate_mps,source_count,covariance_x_m2,covariance_y_m2
+2026-05-07T10:00:00Z,RADAR-ALPHA,36.700000,-6.250000,6.20,62.0,63.0,111111111,under_way_using_engine,high,RADAR-TEST-01,RDR-T001,1000.0,60.00,-3.20,2,225.0,225.0
+2026-05-07T10:00:10Z,RADAR-ALPHA,36.700784,-6.248160,6.16,61.7,62.7,222222222,under_way_using_engine,high,RADAR-TEST-01,RDR-T001,1062.0,60.50,-3.10,2,225.0,225.0

@@ -1,1 +1,2 @@
 pytest>=8.0
+geographiclib>=2.0
